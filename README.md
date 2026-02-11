@@ -100,3 +100,8 @@ Future versions of the application may include additional features such as user 
 ## License
 
 This project is licensed under the MIT License.
+
+## Database Setup
+1. Run 00_create_database.sql
+2. Run 01_create_table.sql
+3. Run 02_seed_data.sql
