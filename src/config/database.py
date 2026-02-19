@@ -1,11 +1,12 @@
 import pyodbc
+from .database_config import DATABASE_CONFIG
 
 class DatabaseConnection:
-    def __init__(self, server, database, uid, pwd):
-        self.server = server
-        self.database = database
-        self.uid = uid
-        self.pwd = pwd
+    def __init__(self):
+        self.server = DATABASE_CONFIG["host"]
+        self.database = DATABASE_CONFIG["database"]
+        self.uid = DATABASE_CONFIG["user"]
+        self.pwd = DATABASE_CONFIG["password"]
         self.connection = None
 
     def connect(self):

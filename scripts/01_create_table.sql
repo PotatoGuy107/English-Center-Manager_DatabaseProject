@@ -1,179 +1,171 @@
-USE EnglishCenterDB;
-
-
----Create student-----
+-- 1. Student
 CREATE TABLE Student (
-    student_id VARCHAR(10) PRIMARY KEY,
-    full_name NVARCHAR(100),
+    student_id INT IDENTITY(1,1) PRIMARY KEY,
+    full_name NVARCHAR(100) NOT NULL,
     date_of_birth DATE,
-    gender VARCHAR(10),
+    gender NVARCHAR(10),
     address NVARCHAR(255),
-    phone_number VARCHAR(20),
-    email VARCHAR(100),
-    register_date DATE,
-    status VARCHAR(20)
+    phone_number NVARCHAR(20),
+    email NVARCHAR(100) UNIQUE,
+    register_date DATE DEFAULT GETDATE(),
+    status NVARCHAR(20) 
+        CHECK (status IN ('active','inactive')) 
+        DEFAULT 'active'
 );
 
-------Create Course-----
+-- 2. Course
 CREATE TABLE Course (
-    course_id VARCHAR(10) PRIMARY KEY,
-    course_name NVARCHAR(100) NOT NULL,
-    description NVARCHAR(255),
+    course_id INT IDENTITY(1,1) PRIMARY KEY,
+    course_name NVARCHAR(150) NOT NULL,
+    description NVARCHAR(MAX),
     level NVARCHAR(50),
     duration_weeks INT,
     tuition_fee DECIMAL(12,2),
-    status VARCHAR(20)
+    status NVARCHAR(20) 
+        CHECK (status IN ('active','inactive')) 
+        DEFAULT 'active'
 );
 
-------------Create skill-------------
+-- 3. Enrollment
+CREATE TABLE Enrollment (
+    enrollment_id INT IDENTITY(1,1) PRIMARY KEY,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date DATE DEFAULT GETDATE(),
+    start_date DATE,
+    end_date DATE,
+    enrollment_status NVARCHAR(30)
+        CHECK (enrollment_status IN ('pending','studying','completed','cancelled'))
+        DEFAULT 'pending',
+
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (course_id) REFERENCES Course(course_id)
+);
+
+-- 4. Payment
+CREATE TABLE Payment (
+    payment_id INT IDENTITY(1,1) PRIMARY KEY,
+    enrollment_id INT NOT NULL,
+    payment_date DATE DEFAULT GETDATE(),
+    amount DECIMAL(12,2) NOT NULL,
+    payment_status NVARCHAR(30)
+        CHECK (payment_status IN ('unpaid','paid','partial','refunded'))
+        DEFAULT 'unpaid',
+    note NVARCHAR(255),
+
+    FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
+);
+
+-- 5. Skill
 CREATE TABLE Skill (
-    skill_id VARCHAR(10) PRIMARY KEY,
-    course_id VARCHAR(10) NOT NULL,
-    skill_name NVARCHAR(100),
-    description NVARCHAR(255),
+    skill_id INT IDENTITY(1,1) PRIMARY KEY,
+    course_id INT NOT NULL,
+    skill_name NVARCHAR(150) NOT NULL,
+    description NVARCHAR(MAX),
 
-    CONSTRAINT FK_Skill_Course
-        FOREIGN KEY (course_id) REFERENCES Course(course_id)
+    FOREIGN KEY (course_id) REFERENCES Course(course_id)
 );
 
---------Create teacher-------------
+-- 6. Teacher
 CREATE TABLE Teacher (
-    teacher_id VARCHAR(10) PRIMARY KEY,
-    full_name NVARCHAR(100),
-    phone_number VARCHAR(20),
-    email VARCHAR(100),
-    specialization NVARCHAR(100),
+    teacher_id INT IDENTITY(1,1) PRIMARY KEY,
+    full_name NVARCHAR(100) NOT NULL,
+    phone_number NVARCHAR(20),
+    email NVARCHAR(100),
+    specialization NVARCHAR(150),
     hire_date DATE,
-    status VARCHAR(20)
+    status NVARCHAR(20)
+        CHECK (status IN ('active','inactive'))
+        DEFAULT 'active'
 );
 
------------Create room-------------------
-CREATE TABLE Room (
-    room_id VARCHAR(10) PRIMARY KEY,
-    room_name NVARCHAR(50),
-    capacity INT,
-    location NVARCHAR(100),
-    status VARCHAR(20)
-);
-
---------------Create class------------------
+-- 7. Class
 CREATE TABLE Class (
-    class_id VARCHAR(10) PRIMARY KEY,
-    class_name NVARCHAR(100),
-    skill_id VARCHAR(10) NOT NULL,
-    teacher_id VARCHAR(10) NOT NULL,
+    class_id INT IDENTITY(1,1) PRIMARY KEY,
+    skill_id INT NOT NULL,
+    teacher_id INT NOT NULL,
+    class_name NVARCHAR(150),
     start_date DATE,
     end_date DATE,
     max_student INT,
-    status VARCHAR(20),
+    status NVARCHAR(20)
+        CHECK (status IN ('planned','ongoing','completed','cancelled'))
+        DEFAULT 'planned',
 
-    CONSTRAINT FK_Class_Skill
-        FOREIGN KEY (skill_id) REFERENCES Skill(skill_id),
-
-    CONSTRAINT FK_Class_Teacher
-        FOREIGN KEY (teacher_id) REFERENCES Teacher(teacher_id)
+    FOREIGN KEY (skill_id) REFERENCES Skill(skill_id),
+    FOREIGN KEY (teacher_id) REFERENCES Teacher(teacher_id)
 );
 
---------------Create schedule---------------
+-- 8. Class_Enrollment
+CREATE TABLE Class_Enrollment (
+    class_enrollment_id INT IDENTITY(1,1) PRIMARY KEY,
+    student_id INT NOT NULL,
+    class_id INT NOT NULL,
+    join_date DATE DEFAULT GETDATE(),
+    status NVARCHAR(30)
+        CHECK (status IN ('studying','completed','dropped'))
+        DEFAULT 'studying',
+
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (class_id) REFERENCES Class(class_id)
+);
+
+-- 9. Exam
+CREATE TABLE Exam (
+    exam_id INT IDENTITY(1,1) PRIMARY KEY,
+    class_id INT NOT NULL,
+    exam_type NVARCHAR(50),
+    exam_date DATE,
+    description NVARCHAR(MAX),
+
+    FOREIGN KEY (class_id) REFERENCES Class(class_id)
+);
+
+-- 10. Exam_Result
+CREATE TABLE Exam_Result (
+    exam_result_id INT IDENTITY(1,1) PRIMARY KEY,
+    exam_id INT NOT NULL,
+    class_enrollment_id INT NOT NULL,
+    overall_score DECIMAL(5,2),
+    result_status NVARCHAR(10)
+        CHECK (result_status IN ('pass','fail')),
+
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id),
+    FOREIGN KEY (class_enrollment_id) REFERENCES Class_Enrollment(class_enrollment_id)
+);
+
+-- 11. Exam_Result_Detailed
+CREATE TABLE Exam_Result_Detailed (
+    exam_result_detailed_id INT IDENTITY(1,1) PRIMARY KEY,
+    exam_result_id INT NOT NULL,
+    skill_id INT NOT NULL,
+    score DECIMAL(5,2),
+
+    FOREIGN KEY (exam_result_id) REFERENCES Exam_Result(exam_result_id),
+    FOREIGN KEY (skill_id) REFERENCES Skill(skill_id)
+);
+
+-- 12. Room
+CREATE TABLE Room (
+    room_id INT IDENTITY(1,1) PRIMARY KEY,
+    room_name NVARCHAR(100),
+    capacity INT,
+    location NVARCHAR(150),
+    status NVARCHAR(20)
+        CHECK (status IN ('available','maintenance','unavailable'))
+        DEFAULT 'available'
+);
+
+-- 13. Schedule
 CREATE TABLE Schedule (
-    schedule_id VARCHAR(10) PRIMARY KEY,
-    class_id VARCHAR(10) NOT NULL,
-    room_id VARCHAR(10) NOT NULL,
+    schedule_id INT IDENTITY(1,1) PRIMARY KEY,
+    class_id INT NOT NULL,
+    room_id INT NOT NULL,
     study_date DATE,
     time_slot NVARCHAR(50),
     start_time TIME,
     end_time TIME,
 
-    CONSTRAINT FK_Schedule_Class
-        FOREIGN KEY (class_id) REFERENCES Class(class_id),
-
-    CONSTRAINT FK_Schedule_Room
-        FOREIGN KEY (room_id) REFERENCES Room(room_id)
+    FOREIGN KEY (class_id) REFERENCES Class(class_id),
+    FOREIGN KEY (room_id) REFERENCES Room(room_id)
 );
-
------------------Create enrollment--------------------
-CREATE TABLE Enrollment (
-    enrollment_id VARCHAR(10) PRIMARY KEY,
-    student_id VARCHAR(10) NOT NULL,
-    course_id VARCHAR(10) NOT NULL,
-    enrollment_date DATE,
-    start_date DATE,
-    end_date DATE,
-    enrollment_status VARCHAR(20),
-
-    CONSTRAINT FK_Enrollment_Student
-        FOREIGN KEY (student_id) REFERENCES Student(student_id),
-
-    CONSTRAINT FK_Enrollment_Course
-        FOREIGN KEY (course_id) REFERENCES Course(course_id)
-);
-
----------------Create payment-------------------
-CREATE TABLE Payment (
-    payment_id VARCHAR(10) PRIMARY KEY,
-    enrollment_id VARCHAR(10) NOT NULL,
-    payment_date DATE,
-    amount DECIMAL(12,2),
-    payment_status VARCHAR(20),
-    note NVARCHAR(255),
-
-    CONSTRAINT FK_Payment_Enrollment
-        FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
-);
-
-----------------create class_enrollment-------------------
-CREATE TABLE Class_Enrollment (
-    class_enrollment_id VARCHAR(10) PRIMARY KEY,
-    student_id VARCHAR(10) NOT NULL,
-    class_id VARCHAR(10) NOT NULL,
-    join_date DATE,
-    status VARCHAR(20),
-
-    CONSTRAINT FK_ClassEnroll_Student
-        FOREIGN KEY (student_id) REFERENCES Student(student_id),
-
-    CONSTRAINT FK_ClassEnroll_Class
-        FOREIGN KEY (class_id) REFERENCES Class(class_id)
-);
-
-----------------create exam-----------------
-CREATE TABLE Exam (
-    exam_id VARCHAR(10) PRIMARY KEY,
-    class_id VARCHAR(10) NOT NULL,
-    exam_type NVARCHAR(50),
-    exam_date DATE,
-    description NVARCHAR(255),
-
-    CONSTRAINT FK_Exam_Class
-        FOREIGN KEY (class_id) REFERENCES Class(class_id)
-);
-
----------------create exam results ---------------------
-CREATE TABLE Exam_Result (
-    exam_result_id VARCHAR(10) PRIMARY KEY,
-    exam_id VARCHAR(10) NOT NULL,
-    class_enrollment_id VARCHAR(10) NOT NULL,
-    overall_score DECIMAL(5,2),
-    result_status VARCHAR(20),
-
-    CONSTRAINT FK_Result_Exam
-        FOREIGN KEY (exam_id) REFERENCES Exam(exam_id),
-
-    CONSTRAINT FK_Result_ClassEnroll
-        FOREIGN KEY (class_enrollment_id) REFERENCES Class_Enrollment(class_enrollment_id)
-);
-
--------------------create exam results detailed-------------------
-CREATE TABLE Exam_Result_Detailed (
-    exam_result_detail_id VARCHAR(10) PRIMARY KEY,
-    exam_result_id VARCHAR(10) NOT NULL,
-    skill_id VARCHAR(10) NOT NULL,
-    score DECIMAL(5,2),
-
-    CONSTRAINT FK_ResultDetail_Result
-        FOREIGN KEY (exam_result_id) REFERENCES Exam_Result(exam_result_id),
-
-    CONSTRAINT FK_ResultDetail_Skill
-        FOREIGN KEY (skill_id) REFERENCES Skill(skill_id)
-);
-
