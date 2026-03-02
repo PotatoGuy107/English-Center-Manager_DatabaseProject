@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>971</width>
+    <height>554</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>901</width>
+      <height>551</height>
+     </rect>
+    </property>
+    <widget class="QWidget" name="widget_2" native="true">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>40</y>
+       <width>761</width>
+       <height>461</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">/* Dùng dấu chấm ở trước để áp dụng cho chính nó và con của nó */
+.QWidget {
+    background-color: white;
+    border: 1px solid #bc1823; /* Thêm cái viền đỏ để dễ kiểm tra xem nó có ăn code không */
+}</string>
+     </property>
+     <widget class="QWidget" name="widget_3" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>331</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QWidget#widget_login_box {
+    background-color: #ffffff; /* Nền trắng tinh */
+    border-radius: 15px;       /* Bo góc cho mềm mại */
+    border: 1px solid #f0f0f0; /* Viền xám cực nhạt để phân biệt với nền ngoài */
+}
+
+/* Các Label tiêu đề bên trong Widget này */
+QLabel {
+    background-color: transparent; /* Đảm bảo label không có nền đè lên */
+    color: #bc1823;               /* Chữ đỏ đô */
+    font-family: &quot;Segoe UI Semib/* Dùng dấu chấm ở trước để áp dụng cho chính nó và con của nó */
+.QWidget {
+    background-color: white;
+    border: 1px solid #bc1823; /* Thêm cái viền đỏ để dễ kiểm tra xem nó có ăn code không */
+}old&quot;;
+}</string>
+      </property>
+      <widget class="QLabel" name="label_trungtam">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>170</y>
+         <width>281</width>
+         <height>101</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Bỏ nền và viền hoàn toàn */
+    background-color: transparent;
+    border: none;
+    
+    /* Màu đỏ đô đặc trưng của Trầm */
+    color: #bc1823;
+    
+    /* Phông chữ: Ưu tiên Montserrat nếu máy đã cài, không thì dùng Segoe UI Black */
+    font-family: &quot;Montserrat ExtraBold&quot;, &quot;Segoe UI Black&quot;, sans-serif;
+    font-size: 26pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    
+    /* Giãn cách giữa các chữ cái (quan trọng để làm logo chữ) */
+    letter-spacing: 3px;
+    
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Hiệu ứng lướt qua cực nhẹ để tăng tính tương tác */
+QLabel:hover {
+    color: #9c141d; /* Đậm hơn một tông khi di chuột vào */
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;TRUNG TÂM ANH NGỮ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="widget_4" native="true">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>0</y>
+        <width>431</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    /* Bỏ nền, chỉ để chữ màu đỏ đô thương hiệu */
+    background-color: transparent;
+    color: #bc1823;
+    
+    /* Font chữ giữ nguyên độ đậm và in hoa */
+    font: 700 10pt &quot;Segoe UI&quot;;
+    text-transform: uppercase;
+    
+    /* Căn giữa chữ */
+    qproperty-alignment: 'AlignCenter';
+    padding: 5px;
+}
+
+/* Hiệu ứng khi di chuột vào (Hover) */
+QLabel:hover {
+    /* Khi trỏ vào, chữ sẽ sáng hơn một chút hoặc hiện nền hồng rất nhạt để biết là đang trỏ vào */
+    background-color: #ffecee; 
+    border-radius: 5px;
+    color: #9c141d; /* Đỏ đậm hơn một chút khi hover */
+}</string>
+      </property>
+      <widget class="QLabel" name="label_nendangnhap">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>30</y>
+         <width>321</width>
+         <height>381</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Màu nền hồng nhạt cố định */
+    background-color: #ffecee;
+    
+    /* Chữ màu đỏ đô thương hiệu */
+    color: #bc1823;
+    
+    /* Font chữ đậm, in hoa chuẩn Dashboard */
+    font-family: &quot;Segoe UI&quot;;
+    font-size: 10pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    
+    /* Bo góc 8px cho mềm mại */
+    border-radius: 8px;
+    
+    /* Viền hồng đậm hơn một chút để định hình khung */
+    border: 1px solid #df9da2;
+    
+    /* Căn giữa chữ và tạo khoảng trống */
+    qproperty-alignment: 'AlignCenter';
+    padding: 8px;
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>170</y>
+         <width>211</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_1">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>240</y>
+         <width>211</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::PasswordEchoOnEdit</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_dangnhap">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>280</y>
+         <width>111</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    /* Màu nền đỏ đậm thương hiệu của Trầm */
+    background-color: #bc1823; 
+    border: 1px solid #bc1823;
+    border-radius: 6px;
+    
+    /* Chữ chuyển sang màu trắng để nổi trên nền đỏ */
+    color: white;
+    font: 700 9pt &quot;Segoe UI&quot;;
+    
+    /* Khoảng cách bên trong nút */
+    padding: 5px 15px;
+}
+
+QPushButton:hover {
+    /* Hiệu ứng khi di chuột vào: Đỏ sậm hơn một chút */
+    background-color: #9c141d;
+    border: 1px solid #9c141d;
+}
+
+QPushButton:pressed {
+    /* Hiệu ứng khi nhấn xuống: Màu hồng đậm và chữ tối lại */
+    background-color: #df9da2;
+    color: #bc1823;
+}</string>
+       </property>
+       <property name="text">
+        <string>ĐĂNG NHẬP</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_quenmatkhau">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>320</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Bỏ nền và viền hoàn toàn */
+    background-color: transparent;
+    border: none;
+    
+    /* Màu đỏ đô đặc trưng */
+    color: #bc1823;
+    
+    /* Phông chữ Times New Roman */
+    font-family: &quot;Times New Roman&quot;, serif;
+    font-size: 9pt; /* Tăng size một chút vì chữ thường sẽ nhỏ hơn chữ in hoa */
+    font-weight: 700; /* Để Bold vừa phải cho rõ nét */
+    
+    /* KHÔNG viết in hoa */
+    text-transform: none;
+    
+    /* Giãn cách giữa các chữ cái nhẹ nhàng */
+    letter-spacing: 1px;
+    
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Hiệu ứng khi di chuột vào */
+QLabel:hover {
+    color: #9c141d;
+    /* Có thể thêm gạch chân nếu muốn giống style link web */
+    /* text-decoration: underline; */
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:7pt; font-weight:400; text-decoration: underline;&quot;&gt;Quên mật khẩu&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_dangnhap">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>40</y>
+         <width>361</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Bỏ nền và viền hoàn toàn */
+    background-color: transparent;
+    border: none;
+    
+    /* Màu đỏ đô đặc trưng của Trầm */
+    color: #bc1823;
+    
+    /* Phông chữ: Ưu tiên Montserrat nếu máy đã cài, không thì dùng Segoe UI Black */
+    font-family: &quot;Montserrat ExtraBold&quot;, &quot;Segoe UI Black&quot;, sans-serif;
+    font-size: 26pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    
+    /* Giãn cách giữa các chữ cái (quan trọng để làm logo chữ) */
+    letter-spacing: 3px;
+    
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Hiệu ứng lướt qua cực nhẹ để tăng tính tương tác */
+QLabel:hover {
+    color: #9c141d; /* Đậm hơn một tông khi di chuột vào */
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;ĐĂNG NHẬP HỆ THỐNG&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_tendangnhap">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>140</y>
+         <width>131</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Bỏ nền và viền hoàn toàn */
+    background-color: transparent;
+    border: none;
+    
+    /* Màu đỏ đô đặc trưng */
+    color: #bc1823;
+    
+    /* Phông chữ Times New Roman */
+    font-family: &quot;Times New Roman&quot;, serif;
+    font-size: 9pt; /* Tăng size một chút vì chữ thường sẽ nhỏ hơn chữ in hoa */
+    font-weight: 700; /* Để Bold vừa phải cho rõ nét */
+    
+    /* KHÔNG viết in hoa */
+    text-transform: none;
+    
+    /* Giãn cách giữa các chữ cái nhẹ nhàng */
+    letter-spacing: 1px;
+    
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Hiệu ứng khi di chuột vào */
+QLabel:hover {
+    color: #9c141d;
+    /* Có thể thêm gạch chân nếu muốn giống style link web */
+    /* text-decoration: underline; */
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Tên đăng nhập:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_matkhau">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>220</y>
+         <width>69</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    /* Bỏ nền và viền hoàn toàn */
+    background-color: transparent;
+    border: none;
+    
+    /* Màu đỏ đô đặc trưng */
+    color: #bc1823;
+    
+    /* Phông chữ Times New Roman */
+    font-family: &quot;Times New Roman&quot;, serif;
+    font-size: 9pt; /* Tăng size một chút vì chữ thường sẽ nhỏ hơn chữ in hoa */
+    font-weight: 700; /* Để Bold vừa phải cho rõ nét */
+    
+    /* KHÔNG viết in hoa */
+    text-transform: none;
+    
+    /* Giãn cách giữa các chữ cái nhẹ nhàng */
+    letter-spacing: 1px;
+    
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Hiệu ứng khi di chuột vào */
+QLabel:hover {
+    color: #9c141d;
+    /* Có thể thêm gạch chân nếu muốn giống style link web */
+    /* text-decoration: underline; */
+}</string>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Mật khẩu:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>971</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
