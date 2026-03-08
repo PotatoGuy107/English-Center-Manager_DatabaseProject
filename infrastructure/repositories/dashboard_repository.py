@@ -1,13 +1,11 @@
-import sqlite3
-
-from infrastructure.config.database import DB_PATH
+from infrastructure.config.database import get_connection
 
 
 class DashboardRepository:
 
     @staticmethod
     def get_room_count() -> int:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM Room")
         count = cursor.fetchone()[0]
@@ -16,7 +14,7 @@ class DashboardRepository:
 
     @staticmethod
     def get_student_count() -> int:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM Student")
         count = cursor.fetchone()[0]
@@ -25,7 +23,7 @@ class DashboardRepository:
 
     @staticmethod
     def get_course_count() -> int:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM Course")
         count = cursor.fetchone()[0]
@@ -34,7 +32,7 @@ class DashboardRepository:
 
     @staticmethod
     def get_teacher_count() -> int:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM Teacher")
         count = cursor.fetchone()[0]

@@ -1,12 +1,15 @@
 from PyQt6.QtWidgets import (
     QMainWindow, QMessageBox, QTableWidgetItem,
     QDialog, QFormLayout, QLineEdit,
-    QDialogButtonBox, QVBoxLayout,
+    QDialogButtonBox, QVBoxLayout, QComboBox,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 
 from interface.views.generated.room_ui import Ui_MainWindow
 from infrastructure.repositories.room_repository import RoomRepository
+
+# Valid status values for Room table (CHECK constraint)
+ROOM_STATUS_OPTIONS = ["available", "maintenance", "unavailable"]
 
 
 class RoomController(QMainWindow):
@@ -55,38 +58,68 @@ class RoomController(QMainWindow):
             QDialog { background-color: white; border: 2px solid #bc1823; }
             QLabel { color: #bc1823; font-weight: bold; }
             QLineEdit { background-color: #ffecee; border: 1px solid #bc1823; padding: 5px; color: black; }
+            QComboBox { background-color: #ffecee; border: 1px solid #bc1823; padding: 5px; color: black; }
             QPushButton { background-color: #bc1823; color: white; font-weight: bold; min-width: 80px; padding: 5px; }
         """)
         layout = QVBoxLayout(dialog)
         form_layout = QFormLayout()
+        
+        # Create input fields
         self.inputs = {
-            "id": QLineEdit(), "name": QLineEdit(),
-            "cap": QLineEdit(), "type": QLineEdit(), "status": QLineEdit(),
+            "id": QLineEdit(),
+            "name": QLineEdit(),
+            "cap": QLineEdit(),
+            "location": QLineEdit(),
         }
+        # Status is a dropdown with valid options
+        self.status_combo = QComboBox()
+        self.status_combo.addItems(ROOM_STATUS_OPTIONS)
+        
         if data:
-            keys = list(self.inputs.keys())
-            for i, key in enumerate(keys):
-                self.inputs[key].setText(str(data[i]))
+            self.inputs["id"].setText(str(data[0]))
+            self.inputs["name"].setText(str(data[1]))
+            self.inputs["cap"].setText(str(data[2]))
+            self.inputs["location"].setText(str(data[3]))
+            # Set current status in combo
+            status_idx = self.status_combo.findText(str(data[4]))
+            if status_idx >= 0:
+                self.status_combo.setCurrentIndex(status_idx)
             self.inputs["id"].setReadOnly(True)
-        labels = ["Room ID:", "Room Name:", "Capacity:", "Type:", "Status:"]
-        for label, key in zip(labels, self.inputs):
-            form_layout.addRow(label, self.inputs[key])
+        else:
+            # Adding new room - ID is auto-generated
+            self.inputs["id"].setText("(Auto)")
+            self.inputs["id"].setReadOnly(True)
+        
+        form_layout.addRow("Room ID:", self.inputs["id"])
+        form_layout.addRow("Room Name:", self.inputs["name"])
+        form_layout.addRow("Capacity:", self.inputs["cap"])
+        form_layout.addRow("Location:", self.inputs["location"])
+        form_layout.addRow("Status:", self.status_combo)
+        
         layout.addLayout(form_layout)
         btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         btns.accepted.connect(dialog.accept)
         btns.rejected.connect(dialog.reject)
         layout.addWidget(btns)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            return [i.text() for i in self.inputs.values()]
+            return [
+                self.inputs["id"].text(),
+                self.inputs["name"].text(),
+                self.inputs["cap"].text(),
+                self.inputs["location"].text(),
+                self.status_combo.currentText()
+            ]
         return None
 
     def handle_add(self):
         res = self.show_input_form("Add Room")
         if res:
             try:
-                RoomRepository.insert_room(res)
+                # data = (room_name, capacity, location, status) - room_id is auto-generated
+                room_data = (res[1], res[2], res[3], res[4])
+                new_room_id = RoomRepository.insert_room(room_data)
                 self.load_data()
-                QMessageBox.information(self, "Success", "Room added successfully!")
+                QMessageBox.information(self, "Success", f"Room {new_room_id} added successfully!")
             except Exception as e:
                 QMessageBox.critical(self, "Error", str(e))
 
@@ -101,7 +134,8 @@ class RoomController(QMainWindow):
             return
         room_id = self.ui.table_quanly2.item(row, 0).text()
         current_status = self.ui.table_quanly2.item(row, 4).text()
-        new_status = "Inactive" if current_status == "Active" else "Active"
+        # Toggle between available and unavailable
+        new_status = "unavailable" if current_status == "available" else "available"
         try:
             RoomRepository.update_status(room_id, new_status)
             self.load_data()

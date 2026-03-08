@@ -30,11 +30,12 @@ class TeacherClassListController(QDialog):
         for row, c in enumerate(classes):
             table.insertRow(row)
             table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
-            table.setItem(row, 1, QTableWidgetItem(c.code))
-            table.setItem(row, 2, QTableWidgetItem(c.name))
-            table.setItem(row, 3, QTableWidgetItem(c.course))
-            table.setItem(row, 4, QTableWidgetItem(str(c.max_students)))
-            table.setItem(row, 5, QTableWidgetItem(c.status))
+            # c is tuple: (class_id, class_name, course_name, skill_name, teacher_id, start_date, end_date, max_student, status)
+            table.setItem(row, 1, QTableWidgetItem(str(c[0])))  # class_id
+            table.setItem(row, 2, QTableWidgetItem(str(c[1])))  # class_name
+            table.setItem(row, 3, QTableWidgetItem(str(c[2] or "")))  # course_name
+            table.setItem(row, 4, QTableWidgetItem(str(c[7] or 0)))  # max_student
+            table.setItem(row, 5, QTableWidgetItem(str(c[8] or "")))  # status
 
     def open_select_exam(self):
         selected_items = self.ui.danhsachlopday.selectedItems()

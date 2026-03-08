@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QTableWidgetItem,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
+from datetime import date
 
 from interface.views.generated.teacher_ui import Ui_MainWindow
 from infrastructure.repositories.teacher_repository import TeacherRepository
@@ -57,13 +58,18 @@ class TeacherController(QMainWindow):
         """)
         layout = QVBoxLayout(dialog)
         form = QFormLayout()
-        labels = ["ID:", "Full Name:", "Specialization:", "Degree:", "Phone:", "Status:"]
-        self.inputs = [QLineEdit() for _ in range(6)]
+        # Schema: teacher_id, full_name, phone_number, email, specialization, hire_date, status
+        labels = ["ID:", "Full Name:", "Phone:", "Email:", "Specialization:", "Hire Date:", "Status:"]
+        self.inputs = [QLineEdit() for _ in range(7)]
         if data:
-            for i in range(6):
-                self.inputs[i].setText(str(data[i]))
+            for i in range(min(len(data), 7)):
+                self.inputs[i].setText(str(data[i]) if data[i] else "")
             self.inputs[0].setReadOnly(True)
-        for i in range(6):
+        else:
+            # Adding new teacher - ID is auto-generated
+            self.inputs[0].setText("(Auto)")
+            self.inputs[0].setReadOnly(True)
+        for i in range(7):
             form.addRow(labels[i], self.inputs[i])
         layout.addLayout(form)
         btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -78,9 +84,12 @@ class TeacherController(QMainWindow):
         data = self.show_input_form("Add Teacher")
         if data:
             try:
-                TeacherRepository.insert(data)
+                # data = (full_name, phone, email, specialization, hire_date, status) - teacher_id is auto-generated
+                hire_date = data[5] if data[5] else date.today().strftime("%Y-%m-%d")
+                teacher_data = (data[1], data[2], data[3], data[4], hire_date, data[6] or "Active")
+                new_id = TeacherRepository.insert(teacher_data)
                 self.load_data()
-                QMessageBox.information(self, "Success", "Teacher added successfully!")
+                QMessageBox.information(self, "Success", f"Teacher {new_id} added successfully!")
             except Exception as e:
                 QMessageBox.critical(self, "Error", str(e))
 
@@ -89,11 +98,14 @@ class TeacherController(QMainWindow):
         if row < 0:
             QMessageBox.warning(self, "Error", "Please select a teacher first!")
             return
-        old_data = [self.ui.table_quanly1.item(row, i).text() for i in range(6)]
+        # Get 7 columns from table
+        col_count = self.ui.table_quanly1.columnCount()
+        old_data = [self.ui.table_quanly1.item(row, i).text() if self.ui.table_quanly1.item(row, i) else "" for i in range(col_count)]
         data = self.show_input_form("Edit Teacher", old_data)
         if data:
             try:
-                TeacherRepository.update(data)
+                # data = (teacher_id, full_name, phone, email, specialization, hire_date, status)
+                TeacherRepository.update(tuple(data))
                 self.load_data()
                 QMessageBox.information(self, "Success", "Teacher updated successfully!")
             except Exception as e:

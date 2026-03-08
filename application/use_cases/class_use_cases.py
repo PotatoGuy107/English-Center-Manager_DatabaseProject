@@ -3,6 +3,7 @@ import unicodedata
 from domain.entities.class_entity import Class
 from domain.entities.schedule_entity import Schedule
 from infrastructure.repositories.class_repository import ClassRepository
+from infrastructure.config.database import get_connection
 
 
 class ClassUseCases:
@@ -20,10 +21,42 @@ class ClassUseCases:
         if not last:
             return "L001"
         try:
-            num = int(last[1:])
+            num = int(last) if isinstance(last, int) else int(last[1:])
             return f"L{num + 1:03d}"
         except ValueError:
             return "L001"
+
+    def _get_skill_id_by_name(self, skill_name: str) -> int:
+        """Get skill_id from skill name"""
+        if not skill_name:
+            return 1  # Default skill
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT skill_id FROM Skill WHERE skill_name = ?", (skill_name,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else 1
+
+    def _get_teacher_id_by_name(self, teacher_name: str) -> int:
+        """Get teacher_id from teacher name"""
+        if not teacher_name:
+            return 1  # Default teacher
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT teacher_id FROM Teacher WHERE full_name = ?", (teacher_name,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else 1
+
+    def _format_date(self, date_obj) -> str:
+        """Convert QDate or date object to SQL Server format yyyy-MM-dd"""
+        if hasattr(date_obj, 'toString'):
+            # QDate object
+            return date_obj.toString("yyyy-MM-dd")
+        elif hasattr(date_obj, 'strftime'):
+            # Python date/datetime
+            return date_obj.strftime("%Y-%m-%d")
+        return str(date_obj)
 
     def validate_class_info(self, data) -> tuple[bool, str]:
         if not data.get("name"):
@@ -43,26 +76,36 @@ class ClassUseCases:
         if not valid:
             return False, msg
 
-        code = self.generate_new_class_code()
-        class_obj = Class(
-            code=code,
-            name=data["name"],
-            course=data["course"],
-            skill=data.get("skill", ""),
-            teacher=data["teacher"],
-            start_date=data["start_date"],
-            end_date=data["end_date"],
-            max_students=int(data.get("max_students", 20)),
-            status=data.get("status", "Sắp khai giảng"),
-            progress=f"0/{data.get('max_students', 20)}",
+        # Generate new class_id
+        class_id = self.repo.get_next_class_id()
+        
+        # Get IDs from names
+        skill_id = self._get_skill_id_by_name(data.get("skill", ""))
+        teacher_id = self._get_teacher_id_by_name(data.get("teacher", ""))
+        
+        # Format dates for SQL Server
+        start_date = self._format_date(data["start_date"])
+        end_date = self._format_date(data["end_date"])
+        
+        # Prepare tuple for insert: (class_id, class_name, skill_id, teacher_id, start_date, end_date, max_student, status)
+        class_data = (
+            class_id,
+            data["name"],
+            skill_id,
+            teacher_id,
+            start_date,
+            end_date,
+            int(data.get("max_students", 20)),
+            data.get("status", "Active")
         )
-        success, msg = self.repo.insert_class(class_obj)
+        
+        success, result = self.repo.insert_class(class_data)
         if success and self.temp_schedules:
             for s in self.temp_schedules:
-                s.class_code = code
+                s.class_code = result  # result is the new class_id
             self.repo.insert_schedules(self.temp_schedules)
             self.temp_schedules = []
-        return success, msg if not success else code
+        return success, str(result)
 
     def remove_schedule(self, weekday_text, shift) -> bool:
         self.temp_schedules = [

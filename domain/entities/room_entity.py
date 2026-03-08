@@ -1,14 +1,15 @@
 class Room:
+    """Room entity matching SQL Server Room table"""
     def __init__(
         self,
-        room_id,
-        room_name,
-        capacity,
-        room_type,
-        status,
+        room_id: int = None,
+        room_name: str = "",
+        capacity: int = None,
+        location: str = None,
+        status: str = "Active",
     ):
         self.room_id = room_id
         self.room_name = room_name
         self.capacity = capacity
-        self.room_type = room_type
+        self.location = location
         self.status = status
