@@ -19,6 +19,7 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("English Center Manager")
+        self.current_user_ref_id = None  # Store logged-in user's ref_id
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -68,12 +69,15 @@ class MainApp(QMainWindow):
         self.class_view.logout_requested.connect(self.show_login)
         self.teacher_view.logout_requested.connect(self.show_login)
 
-    def route_by_role(self, role: str):
+    def route_by_role(self, role: str, ref_id: str):
+        self.current_user_ref_id = ref_id
         if role == "admin":
             self.back_home()
         elif role == "staff":
+            self.class_view.load_data()  # Refresh data when showing
             self.stack.setCurrentWidget(self.class_view)
         elif role == "teacher":
+            self.teacher_view.set_teacher_id(ref_id)  # Set teacher filter
             self.stack.setCurrentWidget(self.teacher_view)
         else:
             self.back_home()
@@ -82,6 +86,7 @@ class MainApp(QMainWindow):
         self.stack.setCurrentWidget(self.home)
 
     def show_login(self):
+        self.current_user_ref_id = None
         self.stack.setCurrentWidget(self.login)
 
 

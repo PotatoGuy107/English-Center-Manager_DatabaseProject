@@ -1,21 +1,22 @@
-from PyQt6.QtCore import QDate
+from dataclasses import dataclass
+from datetime import date, time
+from typing import Optional
 
 
+@dataclass
 class Schedule:
-    def __init__(
-        self,
-        class_code,
-        start_date,
-        end_date,
-        weekday,
-        shift,
-        room,
-        teacher,
-    ):
-        self.class_code = class_code
-        self.start_date = start_date
-        self.end_date = end_date
-        self.weekday = weekday
-        self.shift = shift
-        self.room = room
-        self.teacher = teacher
+    """Schedule entity matching database schema"""
+    schedule_id: Optional[int] = None  # INT IDENTITY
+    class_id: int = 0
+    room_id: int = 0
+    study_date: Optional[date] = None
+    time_slot: Optional[str] = None  # e.g., "Ca 1", "Ca 2"
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    
+    # Optional joined data
+    class_name: Optional[str] = None
+    room_name: Optional[str] = None
+    teacher_name: Optional[str] = None
+    max_student: Optional[int] = None
+    status: Optional[str] = None

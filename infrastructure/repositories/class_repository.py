@@ -9,15 +9,14 @@ class ClassRepository(IClassRepository):
     """Repository for Class and Schedule using SQL Server database."""
 
     @staticmethod
-    def get_next_class_id() -> str:
-        """Generate next class_id like CL01, CL02, etc."""
+    def get_next_class_id() -> int:
+        """Get next class_id (for reference only, actual ID is auto-generated)"""
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(CAST(SUBSTRING(class_id, 3, LEN(class_id)-2) AS INT)) FROM Class WHERE class_id LIKE 'CL%'")
+        cursor.execute("SELECT ISNULL(MAX(class_id), 0) + 1 FROM Class")
         row = cursor.fetchone()
         conn.close()
-        max_num = row[0] if row and row[0] else 0
-        return f"CL{max_num + 1:02d}"
+        return row[0] if row else 1
 
     @staticmethod
     def get_next_schedule_id() -> str:
@@ -60,29 +59,30 @@ class ClassRepository(IClassRepository):
         return data
 
     @staticmethod
-    def get_last_class_code() -> str:
+    def get_last_class_code() -> int:
         """Get the last class_id"""
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(CAST(SUBSTRING(class_id, 3, LEN(class_id)-2) AS INT)) FROM Class WHERE class_id LIKE 'CL%'")
+        cursor.execute("SELECT MAX(class_id) FROM Class")
         row = cursor.fetchone()
         conn.close()
-        max_num = row[0] if row and row[0] else 0
-        return f"CL{max_num:02d}" if max_num > 0 else None
+        return row[0] if row and row[0] else 0
 
     @staticmethod
     def insert_class(class_data) -> tuple:
-        """Insert class. class_data = (class_id, class_name, skill_id, teacher_id, start_date, end_date, max_student, status). Returns (success, class_id or error)."""
+        """Insert class. class_data = (class_name, skill_id, teacher_id, start_date, end_date, max_student, status). Returns (success, class_id or error)."""
         try:
             conn = get_connection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO Class (class_id, class_name, skill_id, teacher_id, start_date, end_date, max_student, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Class (class_name, skill_id, teacher_id, start_date, end_date, max_student, status)
+                OUTPUT INSERTED.class_id
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, class_data)
+            new_id = cursor.fetchone()[0]
             conn.commit()
             conn.close()
-            return True, class_data[0]
+            return True, new_id
         except pyodbc.IntegrityError as e:
             return False, str(e)
         except Exception as e:

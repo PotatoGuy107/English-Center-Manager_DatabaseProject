@@ -6,7 +6,8 @@ from infrastructure.repositories.auth_repository import AuthRepository
 
 
 class LoginController(QMainWindow):
-    login_success = pyqtSignal(str)
+    # Emit role and ref_id (teacher_id or staff_id)
+    login_success = pyqtSignal(str, str)
 
     def __init__(self):
         super().__init__()
@@ -20,6 +21,7 @@ class LoginController(QMainWindow):
         password = self.ui.lineEdit_1.text().strip()
         result = self.model.check_login(username, password)
         if result:
-            self.login_success.emit(result["role"])
+            ref_id = result.get("ref_id", "") or ""
+            self.login_success.emit(result["role"], ref_id)
         else:
             QMessageBox.warning(self, "Login Failed", "Invalid username or password")

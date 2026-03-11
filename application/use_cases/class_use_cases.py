@@ -75,21 +75,31 @@ class ClassUseCases:
         valid, msg = self.validate_class_info(data)
         if not valid:
             return False, msg
-
-        # Generate new class_id
-        class_id = self.repo.get_next_class_id()
         
-        # Get IDs from names
-        skill_id = self._get_skill_id_by_name(data.get("skill", ""))
-        teacher_id = self._get_teacher_id_by_name(data.get("teacher", ""))
+        # Get skill_id - either passed directly as int or get from name
+        skill = data.get("skill", "")
+        if isinstance(skill, int):
+            skill_id = skill
+        elif isinstance(skill, str) and skill.isdigit():
+            skill_id = int(skill)
+        else:
+            skill_id = self._get_skill_id_by_name(skill)
+        
+        # Get teacher_id - either passed directly as int or get from name
+        teacher = data.get("teacher", "")
+        if isinstance(teacher, int):
+            teacher_id = teacher
+        elif isinstance(teacher, str) and teacher.isdigit():
+            teacher_id = int(teacher)
+        else:
+            teacher_id = self._get_teacher_id_by_name(teacher)
         
         # Format dates for SQL Server
         start_date = self._format_date(data["start_date"])
         end_date = self._format_date(data["end_date"])
         
-        # Prepare tuple for insert: (class_id, class_name, skill_id, teacher_id, start_date, end_date, max_student, status)
+        # Prepare tuple for insert: (class_name, skill_id, teacher_id, start_date, end_date, max_student, status)
         class_data = (
-            class_id,
             data["name"],
             skill_id,
             teacher_id,
