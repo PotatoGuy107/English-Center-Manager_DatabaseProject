@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QTableWidgetItem,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QBrush, QColor
 from datetime import date
 
 from interface.views.generated.teacher_ui import Ui_MainWindow
@@ -40,11 +41,29 @@ class TeacherController(QMainWindow):
 
     def load_data(self):
         rows = TeacherRepository.get_all()
+        
+        # Setup table with 7 columns for teacher data
+        headers = ["ID", "Họ tên", "SĐT", "Email", "Chuyên môn", "Ngày vào", "Trạng thái"]
+        self.ui.table_quanly1.setColumnCount(len(headers))
+        self.ui.table_quanly1.setHorizontalHeaderLabels(headers)
+        self.ui.table_quanly1.setAlternatingRowColors(False)
+        self.ui.table_quanly1.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         self.ui.table_quanly1.setRowCount(len(rows))
         for row_idx, row_data in enumerate(rows):
             for col_idx, col_data in enumerate(row_data):
-                item = QTableWidgetItem(str(col_data))
+                # Format date for display
+                if col_data is not None and hasattr(col_data, 'strftime'):
+                    display_text = col_data.strftime("%d/%m/%Y")
+                else:
+                    display_text = str(col_data) if col_data is not None else ""
+                item = QTableWidgetItem(display_text)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                item.setForeground(QBrush(QColor("#222")))
                 self.ui.table_quanly1.setItem(row_idx, col_idx, item)
 
     def show_input_form(self, title, data=None):

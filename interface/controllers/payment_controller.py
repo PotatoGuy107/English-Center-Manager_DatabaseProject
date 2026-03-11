@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QBrush, QColor
 
 from application.use_cases.payment_use_cases import PaymentUseCases
 from interface.views.generated.payment_ui import Ui_MainWindow
@@ -31,20 +32,32 @@ class PaymentController(QMainWindow):
     def load_students(self):
         students = self.use_cases.get_students_by_class(self.class_code)
         table = self.ui.danhsachlopday
+        table.setAlternatingRowColors(False)
+        table.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         table.setRowCount(0)
         for row_index, s in enumerate(students):
             table.insertRow(row_index)
             item_stt = QTableWidgetItem(str(row_index + 1))
             item_stt.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            item_stt.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 0, item_stt)
             item_id = QTableWidgetItem(s.student_id)
             item_id.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            item_id.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 1, item_id)
             item_name = QTableWidgetItem(s.name)
             item_name.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            item_name.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 2, item_name)
             for col in range(3, table.columnCount()):
-                table.setItem(row_index, col, QTableWidgetItem(""))
+                item = QTableWidgetItem("")
+                item.setForeground(QBrush(QColor("#222")))
+                table.setItem(row_index, col, item)
 
     def load_payments(self):
         payments = self.use_cases.get_payment(self.class_code)

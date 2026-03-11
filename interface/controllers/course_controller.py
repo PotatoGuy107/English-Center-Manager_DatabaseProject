@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QComboBox, QTextEdit, QSpinBox, QDoubleSpinBox, QLabel, QHBoxLayout,
 )
 from PyQt6.QtCore import pyqtSignal, QEvent, Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QBrush, QColor
 
 from interface.views.generated.course_ui import Ui_MainWindow
 from infrastructure.repositories.course_repository import CourseRepository
@@ -89,11 +89,19 @@ class CourseController(QMainWindow):
         self.ui.table_quanly.setHorizontalHeaderLabels([
             "ID", "KHOÁ HỌC", "MÔ TẢ", "CẤP ĐỘ", "THỜI LƯỢNG", "HỌC PHÍ", "TRẠNG THÁI"
         ])
+        self.ui.table_quanly.setAlternatingRowColors(False)
+        self.ui.table_quanly.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         self.ui.table_quanly.setRowCount(len(rows))
         for row_idx, row_data in enumerate(rows):
             for col_idx, col_data in enumerate(row_data):
                 item = QTableWidgetItem(str(col_data))
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                item.setForeground(QBrush(QColor("#222")))
                 self.ui.table_quanly.setItem(row_idx, col_idx, item)
         # Điều chỉnh độ rộng cột
         self.ui.table_quanly.setColumnWidth(0, 50)   # ID

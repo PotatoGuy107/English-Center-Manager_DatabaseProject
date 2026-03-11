@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QMessageBox, QTableWidgetItem, QComboBox
 from PyQt6.QtCore import QDate, pyqtSignal, Qt
+from PyQt6.QtGui import QBrush, QColor
 from datetime import datetime
 
 from interface.views.generated.class_management_ui import Ui_Dialog
@@ -42,6 +43,24 @@ class ClassController(QDialog):
         # Expand form layout widget to fit all rows properly
         self.ui.formLayoutWidget_7.setGeometry(20, 20, 880, 350)
         self.ui.groupBox_6.setGeometry(20, 380, 880, 150)
+        
+        # Style for sidebar buttons - make them more visible
+        sidebar_btn_style = """
+            QPushButton {
+                background-color: #bc1823;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                border: none;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #8b0000;
+            }
+        """
+        self.ui.Button_taolop.setStyleSheet(sidebar_btn_style)
+        self.ui.Button_dslop.setStyleSheet(sidebar_btn_style)
+        self.ui.Button_logout.setStyleSheet(sidebar_btn_style)
         
         # Style for tab widget
         self.ui.tabWidget_2.setStyleSheet("""
@@ -216,17 +235,32 @@ class ClassController(QDialog):
             for slot in time_slots:
                 combo.addItem(slot)
         
-        # Setup room combos from database
+        # Setup room combos from database with capacity info
         for combo in [self.ui.room1_2, self.ui.room1_3]:
             combo.clear()
             combo.addItem("---Chọn phòng---", None)
             for room in self.rooms:
                 if room[4] == "available":
-                    combo.addItem(room[1], room[0])  # room_name, room_id
+                    # Show room name with capacity: "Phòng A (30 chỗ)"
+                    display_text = f"{room[1]} ({room[2]} chỗ)"
+                    combo.addItem(display_text, room[0])  # display, room_id
         
         # Set default dates
         self.ui.dateca1_2.setDate(QDate.currentDate())
         self.ui.dateca2_2.setDate(QDate.currentDate())
+        
+        # Add class selection combo dynamically to max_class_2 position
+        # max_class_2 will now be used as class selection
+        self.ui.sLNgTIALabel_2.setText("Chọn lớp:")
+        self.load_class_combo()
+        
+        # Connect room combos to show availability
+        self.ui.room1_2.currentIndexChanged.connect(lambda: self.check_room_availability(1))
+        self.ui.room1_3.currentIndexChanged.connect(lambda: self.check_room_availability(2))
+        self.ui.dateca1_2.dateChanged.connect(lambda: self.check_room_availability(1))
+        self.ui.dateca2_2.dateChanged.connect(lambda: self.check_room_availability(2))
+        self.ui.ca1_2.currentIndexChanged.connect(lambda: self.check_room_availability(1))
+        self.ui.ca2_2.currentIndexChanged.connect(lambda: self.check_room_availability(2))
         
         # Apply styling to schedule tab elements
         self.apply_schedule_tab_styles()
@@ -251,6 +285,52 @@ class ClassController(QDialog):
         """
         for combo in [self.ui.ca1_2, self.ui.ca2_2, self.ui.room1_2, self.ui.room1_3]:
             combo.setStyleSheet(combo_style)
+        
+        # Style for date edits in schedule tab - make text visible
+        date_style = """
+            QDateEdit {
+                background-color: #fff5f5;
+                border: 2px solid #bc1823;
+                border-radius: 5px;
+                padding: 5px 10px;
+                font-size: 12px;
+                color: #222;
+            }
+            QDateEdit:focus {
+                border: 2px solid #8b0000;
+                background-color: #ffe0e0;
+            }
+            QDateEdit::drop-down {
+                border: none;
+                width: 25px;
+            }
+        """
+        for date_edit in [self.ui.dateca1_2, self.ui.dateca2_2]:
+            date_edit.setStyleSheet(date_style)
+        
+        # Style for labels in schedule tab
+        label_style = "color: #222; font-weight: bold; font-size: 12px;"
+        for label in [self.ui.label_25, self.ui.label_26, self.ui.label_27, self.ui.label_28,
+                      self.ui.label_29, self.ui.label_30]:
+            label.setStyleSheet(label_style)
+        
+        # Style max_class_2 QLineEdit (max students field)
+        if hasattr(self.ui, 'max_class_2'):
+            self.ui.max_class_2.setStyleSheet("""
+                QLineEdit {
+                    background-color: white;
+                    color: #222;
+                    border: 2px solid #bc1823;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                    font-size: 13px;
+                }
+                QLineEdit:focus {
+                    border: 2px solid #8b0000;
+                    background-color: #fff5f5;
+                }
+            """)
+            self.ui.max_class_2.setPlaceholderText("VD: 30")
 
     def load_courses(self):
         """Load courses into combo box"""
@@ -280,6 +360,91 @@ class ClassController(QDialog):
                 # room: (room_id, room_name, capacity, location, status)
                 if room[4] == "available":  # Only show available rooms
                     combo.addItem(room[1], room[0])  # room_name, room_id
+
+    def load_class_combo(self):
+        """Load all classes into combo for schedule assignment"""
+        self.classes = ClassRepository.get_all_classes()
+        
+        # Convert to editable combo if not already
+        from PyQt6.QtWidgets import QComboBox as QCB
+        if not isinstance(self.ui.max_class_2, QCB):
+            # Create a new combobox to replace the line edit
+            combo = QCB(self.ui.formLayoutWidget_12)
+            combo.setObjectName("class_select_combo")
+            combo.setStyleSheet("""
+                QComboBox {
+                    background-color: white;
+                    color: #222;
+                    border: 2px solid #bc1823;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                    font-size: 13px;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: white;
+                    color: #222;
+                    selection-background-color: #bc1823;
+                    selection-color: white;
+                }
+            """)
+            # Replace in layout
+            self.ui.formLayout_12.replaceWidget(self.ui.max_class_2, combo)
+            self.ui.max_class_2.hide()
+            self.ui.max_class_2 = combo
+        
+        self.ui.max_class_2.clear()
+        self.ui.max_class_2.addItem("---Chọn lớp---", None)
+        for cls in self.classes:
+            # cls: (class_id, class_name, course_id, skill_id, teacher_id, ...)
+            self.ui.max_class_2.addItem(f"{cls[0]} - {cls[1]}", cls[0])  # "ID - Name", class_id
+
+    def check_room_availability(self, slot_num):
+        """Check if room is available for the selected date/time and update UI"""
+        if slot_num == 1:
+            room_id = self.ui.room1_2.currentData()
+            date = self.ui.dateca1_2.date().toPyDate()
+            time_slot = self.ui.ca1_2.currentText()
+            combo = self.ui.room1_2
+        else:
+            room_id = self.ui.room1_3.currentData()
+            date = self.ui.dateca2_2.date().toPyDate()
+            time_slot = self.ui.ca2_2.currentText()
+            combo = self.ui.room1_3
+        
+        if not room_id:
+            return
+        
+        # Parse time slot
+        start_time, end_time = self.schedule_use_cases.parse_time_slot(time_slot)
+        
+        # Check conflict
+        from infrastructure.repositories.schedule_repository import ScheduleRepository
+        has_conflict, conflict_class = ScheduleRepository.check_room_conflict(
+            room_id, date, start_time, end_time
+        )
+        
+        if has_conflict:
+            combo.setStyleSheet("""
+                QComboBox {
+                    background-color: #ffcccc;
+                    color: #8b0000;
+                    border: 2px solid red;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                }
+            """)
+            combo.setToolTip(f"⚠ Phòng đã được sử dụng bởi: {conflict_class}")
+        else:
+            combo.setStyleSheet("""
+                QComboBox {
+                    background-color: #ccffcc;
+                    color: #006400;
+                    border: 2px solid green;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                }
+            """)
+            combo.setToolTip("✓ Phòng trống")
 
     def on_course_selected(self, index):
         """Handle course selection to load skills and display course info"""
@@ -373,32 +538,30 @@ class ClassController(QDialog):
 
     def on_tab_changed(self, index):
         """Handle tab change event"""
-        print(f"Tab changed to index: {index}")
         if index == 1:  # Schedule tab
             try:
-                print("Loading schedule table...")
                 self.load_schedule_table()
-                print("Schedule table loaded successfully")
+                self.load_class_combo()  # Refresh class list
             except Exception as e:
                 import traceback
-                print(f"ERROR in on_tab_changed: {e}")
-                traceback.print_exc()
-                QMessageBox.critical(self, "Lỗi", f"Lỗi load lịch học:\n{str(e)}\n\n{traceback.format_exc()}")
+                QMessageBox.critical(self, "Lỗi", f"Lỗi load lịch học:\n{str(e)}")
 
     def load_schedule_table(self):
         """Load all schedules into the table"""
-        print("load_schedule_table() called")
         try:
             schedules = self.schedule_use_cases.get_all_schedules()
-            print(f"Got {len(schedules)} schedules")
         except Exception as e:
-            import traceback
-            print(f"ERROR getting schedules: {e}")
-            traceback.print_exc()
             QMessageBox.critical(self, "Lỗi", f"Lỗi truy vấn lịch học:\n{str(e)}")
             schedules = []
         
         # Setup table
+        self.ui.qlytrunglich_2.setAlternatingRowColors(False)
+        self.ui.qlytrunglich_2.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         self.ui.qlytrunglich_2.setRowCount(len(schedules))
         
         for row, schedule in enumerate(schedules):
@@ -406,16 +569,24 @@ class ClassController(QDialog):
             #            teacher_name, max_student, study_date, time_slot, start_time, end_time, status)
             
             # STT
-            self.ui.qlytrunglich_2.setItem(row, 0, QTableWidgetItem(str(row + 1)))
+            item = QTableWidgetItem(str(row + 1))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 0, item)
             
             # Mã lớp (class_id)
-            self.ui.qlytrunglich_2.setItem(row, 1, QTableWidgetItem(str(schedule[1])))
+            item = QTableWidgetItem(str(schedule[1]))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 1, item)
             
             # Giảng viên
-            self.ui.qlytrunglich_2.setItem(row, 2, QTableWidgetItem(str(schedule[5] or "")))
+            item = QTableWidgetItem(str(schedule[5] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 2, item)
             
             # Sĩ số
-            self.ui.qlytrunglich_2.setItem(row, 3, QTableWidgetItem(str(schedule[6] or "")))
+            item = QTableWidgetItem(str(schedule[6] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 3, item)
             
             # Ngày
             study_date = schedule[7]
@@ -423,21 +594,29 @@ class ClassController(QDialog):
                 date_str = study_date.strftime("%d/%m/%Y")
             else:
                 date_str = ""
-            self.ui.qlytrunglich_2.setItem(row, 4, QTableWidgetItem(date_str))
+            item = QTableWidgetItem(date_str)
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 4, item)
             
             # Ca
-            self.ui.qlytrunglich_2.setItem(row, 5, QTableWidgetItem(str(schedule[8] or "")))
+            item = QTableWidgetItem(str(schedule[8] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 5, item)
             
             # Phòng
-            self.ui.qlytrunglich_2.setItem(row, 6, QTableWidgetItem(str(schedule[4] or "")))
+            item = QTableWidgetItem(str(schedule[4] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 6, item)
             
             # Trạng thái
-            self.ui.qlytrunglich_2.setItem(row, 7, QTableWidgetItem(str(schedule[11] or "")))
+            item = QTableWidgetItem(str(schedule[11] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.qlytrunglich_2.setItem(row, 7, item)
             
             # Store schedule_id in first column's data
-            item = self.ui.qlytrunglich_2.item(row, 0)
-            if item:
-                item.setData(Qt.ItemDataRole.UserRole, schedule[0])  # schedule_id
+            first_item = self.ui.qlytrunglich_2.item(row, 0)
+            if first_item:
+                first_item.setData(Qt.ItemDataRole.UserRole, schedule[0])  # schedule_id
 
     def on_schedule_table_clicked(self, row, column):
         """Handle table row click to select schedule for deletion"""
@@ -447,6 +626,17 @@ class ClassController(QDialog):
 
     def save_schedule(self):
         """Save schedule from form data"""
+        # Get class from combo
+        class_id = self.ui.max_class_2.currentData() if hasattr(self.ui.max_class_2, 'currentData') else None
+        
+        # Fallback to current_class_id if combo doesn't have selection
+        if not class_id:
+            class_id = self.current_class_id
+        
+        if not class_id:
+            QMessageBox.warning(self, "Lỗi", "Vui lòng chọn lớp học!")
+            return
+        
         # Get schedule 1 data
         date1 = self.ui.dateca1_2.date().toPyDate()
         time_slot1 = self.ui.ca1_2.currentText()
@@ -456,31 +646,6 @@ class ClassController(QDialog):
         date2 = self.ui.dateca2_2.date().toPyDate()
         time_slot2 = self.ui.ca2_2.currentText()
         room_id2 = self.ui.room1_3.currentData()
-        
-        # We need a class to add schedule to
-        # First, load all classes to let user choose
-        self.classes = ClassRepository.get_all_classes()
-        
-        if not self.classes:
-            QMessageBox.warning(self, "Lỗi", "Chưa có lớp nào. Vui lòng tạo lớp trước!")
-            return
-        
-        # If we have a current_class_id from just-created class, use it
-        # Otherwise, show dialog to select class
-        class_id = self.current_class_id
-        
-        if not class_id:
-            # Show simple selection dialog
-            from PyQt6.QtWidgets import QInputDialog
-            class_names = [f"{c[0]} - {c[1]}" for c in self.classes]
-            selected, ok = QInputDialog.getItem(
-                self, "Chọn lớp", "Chọn lớp để thêm lịch:", 
-                class_names, 0, False
-            )
-            if not ok:
-                return
-            # Extract class_id from selection
-            class_id = self.classes[class_names.index(selected)][0]
         
         added_count = 0
         errors = []
@@ -513,10 +678,35 @@ class ClassController(QDialog):
             QMessageBox.information(self, "Thành công", result_msg)
             self.load_schedule_table()
             self.current_class_id = None  # Reset after successful add
+            # Reset room combo styles
+            self.reset_room_combo_styles()
         elif errors:
             QMessageBox.warning(self, "Lỗi", "\n".join(errors))
         else:
             QMessageBox.warning(self, "Lỗi", "Vui lòng chọn phòng học!")
+
+    def reset_room_combo_styles(self):
+        """Reset room combo box styles to default"""
+        default_style = """
+            QComboBox {
+                background-color: #fff5f5;
+                border: 2px solid #bc1823;
+                border-radius: 5px;
+                padding: 5px 10px;
+                font-size: 12px;
+                color: #222;
+            }
+            QComboBox QAbstractItemView {
+                background-color: white;
+                color: #222;
+                selection-background-color: #bc1823;
+                selection-color: white;
+            }
+        """
+        self.ui.room1_2.setStyleSheet(default_style)
+        self.ui.room1_3.setStyleSheet(default_style)
+        self.ui.room1_2.setToolTip("")
+        self.ui.room1_3.setToolTip("")
 
     def delete_schedule(self):
         """Delete selected schedule"""

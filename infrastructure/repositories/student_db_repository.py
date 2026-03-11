@@ -39,17 +39,19 @@ class StudentDbRepository:
         return data
 
     @staticmethod
-    def insert_student(data) -> str:
-        """Insert student. data = (student_id, full_name, date_of_birth, gender, address, phone_number, email, register_date, status). Returns student_id."""
+    def insert_student(data) -> int:
+        """Insert student. data = (full_name, date_of_birth, gender, address, phone_number, email, register_date, status). Returns student_id (auto-generated)."""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Student (student_id, full_name, date_of_birth, gender, address, phone_number, email, register_date, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Student (full_name, date_of_birth, gender, address, phone_number, email, register_date, status) 
+            OUTPUT INSERTED.student_id
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, data)
+        new_id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
-        return data[0]
+        return new_id
 
     @staticmethod
     def update_student(data) -> None:

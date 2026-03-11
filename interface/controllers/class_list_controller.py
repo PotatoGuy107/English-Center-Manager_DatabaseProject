@@ -1,11 +1,14 @@
 from PyQt6.QtWidgets import QDialog, QMessageBox, QTableWidgetItem
+from PyQt6.QtGui import QBrush, QColor
 
 from interface.views.generated.class_list_ui import Ui_Dialog
 from application.use_cases.class_list_use_cases import ClassListUseCases
 
 
 def _make_item(text):
-    return QTableWidgetItem(str(text))
+    item = QTableWidgetItem(str(text))
+    item.setForeground(QBrush(QColor("#222")))
+    return item
 
 
 class ClassListController(QDialog):
@@ -32,6 +35,13 @@ class ClassListController(QDialog):
     def load_data(self):
         data = self.use_cases.get_all_classes()
         table = self.ui.dslopqli
+        table.setAlternatingRowColors(False)
+        table.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         table.setRowCount(0)
         for c in data:
             row = table.rowCount()

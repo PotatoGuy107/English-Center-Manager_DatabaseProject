@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QMessageBox, QTableWidgetItem
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QBrush, QColor
 
 from interface.views.generated.teacher_class_ui import Ui_Dialog
 from application.use_cases.teacher.class_list_use_cases import TeacherClassListUseCases
@@ -36,20 +37,39 @@ class TeacherClassListController(QDialog):
             classes = self.use_cases.get_all_classes()
         
         table = self.ui.danhsachlopday
+        table.setAlternatingRowColors(False)
+        table.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         table.setRowCount(0)
         table.setColumnCount(6)
         table.setHorizontalHeaderLabels(["STT", "Mã lớp", "Tên lớp", "Khóa", "Số HV", "Trạng thái"])
         
         for row, c in enumerate(classes):
             table.insertRow(row)
-            table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
+            item = QTableWidgetItem(str(row + 1))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 0, item)
             # c is tuple: (class_id, class_name, skill_name, start_date, end_date, status)
-            table.setItem(row, 1, QTableWidgetItem(str(c[0])))  # class_id
-            table.setItem(row, 2, QTableWidgetItem(str(c[1])))  # class_name
-            table.setItem(row, 3, QTableWidgetItem(str(c[2] or "")))  # skill_name
+            item = QTableWidgetItem(str(c[0]))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 1, item)  # class_id
+            item = QTableWidgetItem(str(c[1]))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 2, item)  # class_name
+            item = QTableWidgetItem(str(c[2] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 3, item)  # skill_name
             # For max_student count, we would need to query - for now show "-"
-            table.setItem(row, 4, QTableWidgetItem("-"))
-            table.setItem(row, 5, QTableWidgetItem(str(c[5] or "")))  # status
+            item = QTableWidgetItem("-")
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 4, item)
+            item = QTableWidgetItem(str(c[5] or ""))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 5, item)  # status
 
     def open_select_exam(self):
         selected_items = self.ui.danhsachlopday.selectedItems()

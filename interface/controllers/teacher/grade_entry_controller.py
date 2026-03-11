@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QTableWidgetItem, QMessageBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QBrush, QColor
 
 from interface.views.generated.grade_entry_ui import Ui_Dialog
 from application.use_cases.teacher.grade_entry_use_cases import GradeEntryUseCases
@@ -29,14 +30,30 @@ class GradeEntryController(QDialog):
         scores = self.use_cases.get_scores(self.class_code, self.exam_type)
         score_dict = {s.student_id: s.score for s in scores}
 
+        self.ui.danhsachhocvien.setAlternatingRowColors(False)
+        self.ui.danhsachhocvien.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         self.ui.danhsachhocvien.setRowCount(len(students))
         for row, s in enumerate(students):
-            self.ui.danhsachhocvien.setItem(row, 0, QTableWidgetItem(str(row + 1)))
-            self.ui.danhsachhocvien.setItem(row, 1, QTableWidgetItem(s.student_id))
-            self.ui.danhsachhocvien.setItem(row, 2, QTableWidgetItem(s.name))
-            self.ui.danhsachhocvien.setItem(row, 3, QTableWidgetItem(s.birth.toString("dd/MM/yyyy")))
+            item = QTableWidgetItem(str(row + 1))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.danhsachhocvien.setItem(row, 0, item)
+            item = QTableWidgetItem(s.student_id)
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.danhsachhocvien.setItem(row, 1, item)
+            item = QTableWidgetItem(s.name)
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.danhsachhocvien.setItem(row, 2, item)
+            item = QTableWidgetItem(s.birth.toString("dd/MM/yyyy"))
+            item.setForeground(QBrush(QColor("#222")))
+            self.ui.danhsachhocvien.setItem(row, 3, item)
             score_value = score_dict.get(s.student_id, "")
             score_item = QTableWidgetItem(str(score_value))
+            score_item.setForeground(QBrush(QColor("#222")))
             score_item.setFlags(
                 Qt.ItemFlag.ItemIsSelectable |
                 Qt.ItemFlag.ItemIsEditable |

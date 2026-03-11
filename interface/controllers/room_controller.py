@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox, QVBoxLayout, QComboBox,
 )
 from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QBrush, QColor
 
 from interface.views.generated.room_ui import Ui_MainWindow
 from infrastructure.repositories.room_repository import RoomRepository
@@ -42,11 +43,19 @@ class RoomController(QMainWindow):
 
     def load_data(self):
         data = RoomRepository.get_all_rooms()
+        self.ui.table_quanly2.setAlternatingRowColors(False)
+        self.ui.table_quanly2.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         self.ui.table_quanly2.setRowCount(len(data))
         for row_idx, row_data in enumerate(data):
             for col_idx, col_data in enumerate(row_data):
                 item = QTableWidgetItem(str(col_data))
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                item.setForeground(QBrush(QColor("#222")))
                 self.ui.table_quanly2.setItem(row_idx, col_idx, item)
         if hasattr(self.ui, "label_sophong"):
             self.ui.label_sophong.setText(str(len(data)))

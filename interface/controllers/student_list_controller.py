@@ -1,8 +1,28 @@
 from PyQt6.QtWidgets import QDialog, QTableWidgetItem, QMessageBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QBrush, QColor
 
 from interface.views.generated.student_list_ui import Ui_Dialog
 from application.use_cases.student_use_cases import StudentUseCases
+
+# Common input styling for visibility
+INPUT_STYLE = """
+    QLineEdit {
+        background-color: white;
+        color: #222;
+        border: 2px solid #bc1823;
+        border-radius: 5px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    QLineEdit:focus {
+        border: 2px solid #8b0000;
+        background-color: #fff5f5;
+    }
+    QLineEdit::placeholder {
+        color: #999;
+    }
+"""
 
 
 class StudentListController(QDialog):
@@ -13,6 +33,9 @@ class StudentListController(QDialog):
 
         self.class_code = class_code
         self.ui.Malop.setText(class_code)
+
+        # Apply input styling
+        self.ui.txtSearch.setStyleSheet(INPUT_STYLE)
 
         self.use_cases = StudentUseCases()
         self.connect_signals()
@@ -36,19 +59,44 @@ class StudentListController(QDialog):
 
     def fill_table(self, students):
         table = self.ui.dshv
+        table.setAlternatingRowColors(False)
+        table.setStyleSheet("""
+            QTableWidget { background-color: white; color: #222; gridline-color: #ccc; }
+            QTableWidget::item { color: #222; padding: 5px; background-color: white; }
+            QTableWidget::item:selected { background-color: #bc1823; color: white; }
+            QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+        """)
         table.setRowCount(0)
         for student in students:
             row = table.rowCount()
             table.insertRow(row)
-            table.setItem(row, 0, QTableWidgetItem(str(row + 1)))
-            table.setItem(row, 1, QTableWidgetItem(student.student_id))
-            table.setItem(row, 2, QTableWidgetItem(student.name))
-            table.setItem(row, 3, QTableWidgetItem(student.birth.toString("dd/MM/yyyy")))
-            table.setItem(row, 4, QTableWidgetItem(student.gender))
-            table.setItem(row, 5, QTableWidgetItem(student.address))
-            table.setItem(row, 6, QTableWidgetItem(student.phone))
-            table.setItem(row, 7, QTableWidgetItem(student.email))
-            table.setItem(row, 8, QTableWidgetItem(student.register_date.toString("dd/MM/yyyy")))
+            item = QTableWidgetItem(str(row + 1))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 0, item)
+            item = QTableWidgetItem(student.student_id)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 1, item)
+            item = QTableWidgetItem(student.name)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 2, item)
+            item = QTableWidgetItem(student.birth.toString("dd/MM/yyyy"))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 3, item)
+            item = QTableWidgetItem(student.gender)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 4, item)
+            item = QTableWidgetItem(student.address)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 5, item)
+            item = QTableWidgetItem(student.phone)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 6, item)
+            item = QTableWidgetItem(student.email)
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 7, item)
+            item = QTableWidgetItem(student.register_date.toString("dd/MM/yyyy"))
+            item.setForeground(QBrush(QColor("#222")))
+            table.setItem(row, 8, item)
 
     def load_students(self):
         students = self.use_cases.get_students_by_class(self.class_code)

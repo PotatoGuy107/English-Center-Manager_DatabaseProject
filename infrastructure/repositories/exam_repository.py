@@ -6,24 +6,15 @@ class ExamRepository:
     """Manages Exam records in SQL Server."""
 
     @staticmethod
-    def get_next_exam_id() -> str:
-        """Generate next exam_id like EX001, EX002, etc."""
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT MAX(CAST(SUBSTRING(exam_id, 3, LEN(exam_id)-2) AS INT)) FROM Exam WHERE exam_id LIKE 'EX%'")
-        row = cursor.fetchone()
-        conn.close()
-        max_num = row[0] if row and row[0] else 0
-        return f"EX{max_num + 1:03d}"
-
-    @staticmethod
     def get_all() -> list:
+        """Get all exams with class info"""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT e.exam_id, e.class_id, e.exam_type, e.exam_date, e.description, c.class_name
+            SELECT e.exam_id, e.class_id, c.class_name, e.exam_type, e.exam_date, e.description
             FROM Exam e
             LEFT JOIN Class c ON e.class_id = c.class_id
+            ORDER BY e.exam_date DESC
         """)
         data = cursor.fetchall()
         conn.close()
@@ -56,17 +47,19 @@ class ExamRepository:
         return data
 
     @staticmethod
-    def insert(data) -> str:
-        """Insert exam. data = (exam_id, class_id, exam_type, exam_date, description). Returns exam_id."""
+    def insert(data) -> int:
+        """Insert exam. data = (class_id, exam_type, exam_date, description). Returns exam_id."""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Exam (exam_id, class_id, exam_type, exam_date, description) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO Exam (class_id, exam_type, exam_date, description) 
+            OUTPUT INSERTED.exam_id
+            VALUES (?, ?, ?, ?)
         """, data)
+        new_id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
-        return data[0]
+        return new_id
 
     @staticmethod
     def update(data) -> None:
