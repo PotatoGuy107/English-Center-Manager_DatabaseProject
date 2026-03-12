@@ -12,8 +12,8 @@ class TeacherExamController(QDialog):
 
         self.ui.Malop1.setText(class_code)
         self.ui.trove1.clicked.connect(self.go_back)
-        self.ui.giuakhoa.clicked.connect(lambda: self.open_grade_entry("Giữa khóa"))
-        self.ui.cuoikhoa.clicked.connect(lambda: self.open_grade_entry("Cuối khóa"))
+        self.ui.giuakhoa.clicked.connect(lambda: self.open_grade_entry("Midterm"))
+        self.ui.cuoikhoa.clicked.connect(lambda: self.open_grade_entry("Final"))
 
     def open_grade_entry(self, exam_type):
         self.hide()

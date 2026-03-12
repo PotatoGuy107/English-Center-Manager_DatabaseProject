@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QMessageBox, QTableWidgetItem
+from PyQt6.QtWidgets import QWidget, QDialog, QMessageBox, QTableWidgetItem
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 
@@ -6,7 +6,7 @@ from interface.views.generated.teacher_class_ui import Ui_Dialog
 from application.use_cases.teacher.class_list_use_cases import TeacherClassListUseCases
 
 
-class TeacherClassListController(QDialog):
+class TeacherClassListController(QWidget):
     logout_requested = pyqtSignal()
 
     def __init__(self):

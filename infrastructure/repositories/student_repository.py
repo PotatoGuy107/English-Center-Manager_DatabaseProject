@@ -1,60 +1,85 @@
 from domain.entities.student_entity import Student
 from domain.interfaces.i_student_repository import IStudentRepository
-from PyQt6.QtCore import QDate
+from infrastructure.config.database import get_connection
 
 
 class StudentRepository(IStudentRepository):
-    _instance = None
+    """Repository for student queries used by Teacher module - connects to SQL Server."""
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.students = [
-                Student("L001", "HV001", "Nguyen Van A", QDate(2000, 1, 1), "Male", "Hanoi", "0901000001", "a@email.com", QDate.currentDate()),
-                Student("L001", "HV002", "Tran Thi B", QDate(2001, 5, 15), "Female", "HCM", "0901000002", "b@email.com", QDate.currentDate()),
-                Student("L002", "HV003", "Le Van C", QDate(1999, 9, 20), "Male", "Danang", "0901000003", "c@email.com", QDate.currentDate()),
-            ]
-            cls._instance.next_id = 4
-        return cls._instance
-
-    def get_students_by_class(self, class_code) -> list:
-        return [s for s in self.students if s.class_code == class_code]
-
-    def search_students(self, class_code, keyword) -> list:
-        kw = keyword.lower()
+    def get_students_by_class(self, class_id) -> list:
+        """Get students enrolled in a specific class via Class_Enrollment table"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT s.student_id, s.full_name, s.date_of_birth, s.gender,
+                   s.address, s.phone_number, s.email, s.register_date, s.status
+            FROM Student s
+            INNER JOIN Class_Enrollment ce ON s.student_id = ce.student_id
+            WHERE ce.class_id = ?
+        """, (class_id,))
+        rows = cursor.fetchall()
+        conn.close()
         return [
-            s for s in self.students
-            if s.class_code == class_code and (kw in s.student_id.lower() or kw in s.name.lower())
+            Student(
+                student_id=r[0],
+                full_name=r[1],
+                date_of_birth=r[2],
+                gender=r[3],
+                address=r[4],
+                phone_number=r[5],
+                email=r[6],
+                register_date=r[7],
+                status=r[8],
+            )
+            for r in rows
+        ]
+
+    def search_students(self, class_id, keyword) -> list:
+        """Search students in a class by name or ID"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        kw = f"%{keyword}%"
+        cursor.execute("""
+            SELECT s.student_id, s.full_name, s.date_of_birth, s.gender,
+                   s.address, s.phone_number, s.email, s.register_date, s.status
+            FROM Student s
+            INNER JOIN Class_Enrollment ce ON s.student_id = ce.student_id
+            WHERE ce.class_id = ?
+              AND (s.full_name LIKE ? OR CAST(s.student_id AS NVARCHAR) LIKE ?)
+        """, (class_id, kw, kw))
+        rows = cursor.fetchall()
+        conn.close()
+        return [
+            Student(
+                student_id=r[0],
+                full_name=r[1],
+                date_of_birth=r[2],
+                gender=r[3],
+                address=r[4],
+                phone_number=r[5],
+                email=r[6],
+                register_date=r[7],
+                status=r[8],
+            )
+            for r in rows
         ]
 
     def add_student(self, student) -> None:
-        self.students.append(student)
-        self.next_id += 1
+        pass
 
     def update_student(self, student_id, name, phone, email) -> bool:
-        for s in self.students:
-            if s.student_id == student_id:
-                s.name = name
-                s.phone = phone
-                s.email = email
-                return True
         return False
 
     def delete_student(self, student_id) -> bool:
-        before = len(self.students)
-        self.students = [s for s in self.students if s.student_id != student_id]
-        return len(self.students) < before
+        return False
 
     def exists(self, student_id) -> bool:
-        return any(s.student_id == student_id for s in self.students)
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM Student WHERE student_id=?", (student_id,))
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count > 0
 
     def generate_student_id(self) -> str:
-        max_num = 0
-        for s in self.students:
-            try:
-                num = int(s.student_id.replace("HV", ""))
-                if num > max_num:
-                    max_num = num
-            except ValueError:
-                pass
-        return f"HV{max_num + 1:03d}"
+        return ""

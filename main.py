@@ -71,6 +71,7 @@ class MainApp(QMainWindow):
 
     def route_by_role(self, role: str, ref_id: str):
         self.current_user_ref_id = ref_id
+        role = role.strip().lower()
         if role == "admin":
             self.back_home()
         elif role == "staff":
