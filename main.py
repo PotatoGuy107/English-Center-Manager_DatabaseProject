@@ -83,6 +83,7 @@ class MainApp(QMainWindow):
             self.back_home()
 
     def back_home(self):
+        self.home.update_stats()  # Refresh statistics when returning to dashboard
         self.stack.setCurrentWidget(self.home)
 
     def show_login(self):
