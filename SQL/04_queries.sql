@@ -67,6 +67,8 @@ WITH DoanhThuKhoa AS (
     JOIN Payment p ON e.enrollment_id = p.enrollment_id
     GROUP BY c.course_id, c.course_name
     )
+SELECT class_id, class_name, so_hoc_vien, doanh_thu
+FROM DoanhThuLop
 -- 8. Danh sách học viên và giáo viên có địa chỉ email chứa từ khóa "gmail" hoặc "center", phân loại theo vai trò
 SELECT full_name, phone_number, email, N'Học viên' AS vai_tro
 FROM Student
