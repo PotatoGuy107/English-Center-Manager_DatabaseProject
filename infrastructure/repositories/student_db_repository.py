@@ -79,7 +79,7 @@ class StudentDbRepository:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT student_id, full_name, phone_number, email, status FROM Student WHERE full_name LIKE ? OR CAST(student_id AS VARCHAR) LIKE ?",
+            "SELECT student_id, full_name, date_of_birth, gender, address, phone_number, email, register_date, status FROM Student WHERE full_name LIKE ? OR CAST(student_id AS VARCHAR) LIKE ?",
             (f"%{keyword}%", f"%{keyword}%")
         )
         data = cursor.fetchall()
@@ -92,7 +92,7 @@ class StudentDbRepository:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT s.student_id, s.full_name, s.date_of_birth, s.gender, s.phone_number, s.email
+            SELECT s.student_id, s.full_name, s.date_of_birth, s.gender, s.address, s.phone_number, s.email, s.register_date, s.status
             FROM Student s
             JOIN Class_Enrollment ce ON s.student_id = ce.student_id
             WHERE ce.class_id = ?

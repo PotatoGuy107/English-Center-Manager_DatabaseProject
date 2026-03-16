@@ -119,6 +119,11 @@ class ClassRepository(IClassRepository):
 
     @staticmethod
     def get_classes_by_teacher(teacher_id) -> list:
+        try:
+            teacher_id = int(teacher_id)
+        except (ValueError, TypeError):
+            pass  # Leave as is if it can't be converted
+            
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""

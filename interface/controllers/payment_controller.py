@@ -38,6 +38,7 @@ class PaymentController(QMainWindow):
             QTableWidget::item { color: #222; padding: 5px; background-color: white; }
             QTableWidget::item:selected { background-color: #bc1823; color: white; }
             QHeaderView::section { background-color: #bc1823; color: white; font-weight: bold; padding: 5px; }
+            QLineEdit { background-color: white; color: #222; }
         """)
         table.setRowCount(0)
         for row_index, s in enumerate(students):
@@ -46,11 +47,11 @@ class PaymentController(QMainWindow):
             item_stt.setFlags(Qt.ItemFlag.ItemIsEnabled)
             item_stt.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 0, item_stt)
-            item_id = QTableWidgetItem(s.student_id)
+            item_id = QTableWidgetItem(str(getattr(s, "student_id", s.student_id)))
             item_id.setFlags(Qt.ItemFlag.ItemIsEnabled)
             item_id.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 1, item_id)
-            item_name = QTableWidgetItem(s.name)
+            item_name = QTableWidgetItem(str(getattr(s, "full_name", "")))
             item_name.setFlags(Qt.ItemFlag.ItemIsEnabled)
             item_name.setForeground(QBrush(QColor("#222")))
             table.setItem(row_index, 2, item_name)
@@ -65,12 +66,17 @@ class PaymentController(QMainWindow):
         for row in range(table.rowCount()):
             student_id = table.item(row, 1).text()
             for p in payments:
-                if p.student_id == student_id:
-                    table.setItem(row, 3, QTableWidgetItem(p.payment_code))
-                    table.setItem(row, 4, QTableWidgetItem(str(p.amount)))
-                    table.setItem(row, 5, QTableWidgetItem(p.payment_date))
-                    table.setItem(row, 6, QTableWidgetItem(p.status))
-                    table.setItem(row, 7, QTableWidgetItem(p.note))
+                if str(p.student_id) == str(student_id):
+                    items = [
+                        QTableWidgetItem(str(p.payment_code or "")),
+                        QTableWidgetItem(str(p.amount) if p.amount is not None else ""),
+                        QTableWidgetItem(str(p.payment_date or "")),
+                        QTableWidgetItem(str(p.status or "")),
+                        QTableWidgetItem(str(p.note or ""))
+                    ]
+                    for i, item in enumerate(items):
+                        item.setForeground(QBrush(QColor("#222")))
+                        table.setItem(row, i + 3, item)
 
     def save_data(self):
         table = self.ui.danhsachlopday

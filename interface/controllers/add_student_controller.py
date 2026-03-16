@@ -51,16 +51,19 @@ class AddStudentController(QDialog):
 
     def fill_row(self, row, index, s):
         table = self.ui.themhv
+        dob_str = s.date_of_birth.strftime("%d/%m/%Y") if hasattr(s, "date_of_birth") and hasattr(s.date_of_birth, "strftime") else str(getattr(s, "date_of_birth", ""))
+        reg_date_str = s.register_date.strftime("%d/%m/%Y") if hasattr(s, "register_date") and hasattr(s.register_date, "strftime") else str(getattr(s, "register_date", ""))
+        
         items = [
             QTableWidgetItem(str(index + 1)),
-            QTableWidgetItem(s.student_id),
-            QTableWidgetItem(s.name),
-            QTableWidgetItem(s.birth.toString("dd/MM/yyyy")),
-            QTableWidgetItem(s.gender),
-            QTableWidgetItem(s.address),
-            QTableWidgetItem(s.phone),
-            QTableWidgetItem(s.email),
-            QTableWidgetItem(s.register_date.toString("dd/MM/yyyy"))
+            QTableWidgetItem(str(getattr(s, "student_id", ""))),
+            QTableWidgetItem(str(getattr(s, "full_name", ""))),
+            QTableWidgetItem(dob_str),
+            QTableWidgetItem(str(getattr(s, "gender", ""))),
+            QTableWidgetItem(str(getattr(s, "address", ""))),
+            QTableWidgetItem(str(getattr(s, "phone_number", ""))),
+            QTableWidgetItem(str(getattr(s, "email", ""))),
+            QTableWidgetItem(reg_date_str)
         ]
         for col, item in enumerate(items):
             item.setForeground(QBrush(QColor("#222")))

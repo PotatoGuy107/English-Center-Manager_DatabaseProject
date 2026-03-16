@@ -63,8 +63,9 @@ class TeacherClassListController(QWidget):
             item = QTableWidgetItem(str(c[2] or ""))
             item.setForeground(QBrush(QColor("#222")))
             table.setItem(row, 3, item)  # skill_name
-            # For max_student count, we would need to query - for now show "-"
-            item = QTableWidgetItem("-")
+            # Query for max_student count
+            enrolled_count = self.use_cases.get_student_count(c[0])
+            item = QTableWidgetItem(str(enrolled_count))
             item.setForeground(QBrush(QColor("#222")))
             table.setItem(row, 4, item)
             item = QTableWidgetItem(str(c[5] or ""))
